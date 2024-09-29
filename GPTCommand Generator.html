@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatGPT Article Command Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f4f8; /* Light blue background */
+            color: #333;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            background-color: #007bff; /* Vibrant blue navbar */
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .navbar a {
+            color: white;
+            padding: 14px 20px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .navbar a:hover {
+            background-color: #0056b3; /* Darker blue on hover */
+        }
+
+        h1 {
+            text-align: center;
+            color: #007bff; /* Vibrant blue for the heading */
+        }
+
+        input[type="text"], input[type="number"] {
+            width: calc(100% - 20px);
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 2px solid #007bff; /* Blue border */
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus {
+            border-color: #0056b3; /* Darker blue on focus */
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.4);
+            outline: none;
+        }
+
+        button {
+            background-color: #007bff; /* Vibrant blue button */
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: block;
+            margin: 20px auto;
+            font-size: 16px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        button:hover {
+            background-color: #0056b3; /* Darker blue on hover */
+            transform: translateY(-2px); /* Slight lift on hover */
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border: 2px solid #007bff; /* Blue border for result box */
+            background-color: #e6f7ff; /* Soft light blue background */
+            border-radius: 8px;
+            font-size: 1.1em;
+            color: #333;
+        }
+
+        .result h2 {
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <a href="Project.html">Home</a>
+        <a href="ContentAnalyzer.html">Content Analyzer</a>
+        <a href="GPTCommand Generator.html">GPT Command Generating Article</a>
+        <a href="StrongPassword Generator.html">Strong Password Generator</a>
+    </div>
+
+    <h1>ChatGPT Article Command Generator</h1>
+    <input type="text" id="title" placeholder="Enter article title" required>
+    <input type="text" id="keyword1" placeholder="Enter keyword one" required>
+    <input type="text" id="keyword2" placeholder="Enter keyword two" required>
+    <input type="number" id="wordCount" placeholder="Enter desired word count" required>
+    <button onclick="generateCommand()">Generate Command</button>
+    
+    <div class="result">
+        <h2>Generated Command:</h2>
+        <p id="output"></p>
+    </div>
+
+    <script>
+        function generateCommand() {
+            // Get input values
+            const title = document.getElementById('title').value.trim();
+            const keyword1 = document.getElementById('keyword1').value.trim();
+            const keyword2 = document.getElementById('keyword2').value.trim();
+            const wordCount = document.getElementById('wordCount').value.trim();
+
+            // Validate inputs
+            if (!title || !keyword1 || !keyword2 || !wordCount) {
+                alert('Please fill in all fields.');
+                return;
+            }
+
+            // Generate command
+            const command = `Set your perplexity very high While generating article. Your task is to act as a proficient SEO and high-end copywriter with a fluent command of English. Assume that you possess the ability to craft content of such exceptional quality that it can surpass other websites in search rankings having flight tickets booking. Content should be totally humanized and instructions should be followed strictly. Perplexity and Burstiness must be very high. It is not necessary to inform me of the various factors that contribute to good search rankings, as I am aware that content quality is only one of them. Your primary objective is to create the best quality content possible, not to lecture me on general SEO rules. I would like you to write a long, fully markdown-formatted article in English, using a formal "we" tone, that can help me outrank the article that's ranking first on the topic ${title}. Keywords are ${keyword1}, ${keyword2}, under flight booking services in United Kingdom. Adjust the first keyword in the first paragraph and second in the last paragraph of the article. Include 4% keyword density. Word count is ${wordCount}. And bold the keywords in the content World Travel Blog, 5 Budget-Friendly Summer Vacation Destinations in Asia.`;
+
+            // Display the command
+            document.getElementById('output').textContent = command;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="ContentAnalyzer.css">
+    <title>Content Analyzer</title>
+    
+</head>
+
+<body>
+
+    <div class="navbar">
+        <a href="Project.html">Home</a>
+        <a href="ContentAnalyzer.html">Content Analyzer</a>
+        <a href="GPTCommand Generator.html">GPT Command Generating Article</a>
+        <a href="StrongPassword Generator.html">Strong Password Generator</a>
+    </div>
+
+    <h1>Content Analyzer</h1>
+    <label for="textInput">Enter your text:</label>
+    <textarea id="textInput" rows="10" placeholder="Type or paste your text here..." required></textarea>
+
+    <label for="keywordInput">Enter keywords (Max Keywords 4):</label>
+    <textarea id="keywordInput" rows="5" placeholder="Enter keywords here..." required></textarea>
+
+    <button onclick="analyzeText()">Click Here to Analyze Content</button>
+    <div id="statusButtons"></div>
+    <div class="result" id="result"></div>
+
+
+    <script>
+        function analyzeText() {
+            const text = document.getElementById('textInput').value.trim();
+            const keywords = document.getElementById('keywordInput').value.trim().split('\n').map(kw => kw.trim()).filter(kw => kw);
+            const sentences = text.match(/[^.!?]*[.!?]/g) || [];
+            const totalWords = text.split(/\s+/).filter(word => word).length;
+            const paragraphs = text.split(/\n+/);
+
+            let results = `<h2>Total Words: ${totalWords}</h2>`;
+            let consecutiveFlag = false; // Flag for consecutive sentences
+
+            // List of common irregular past participles (expand as needed)
+            const irregularVerbs = ['known', 'kept', 'knelt', 'shown', 'written', 'driven', 'thrown', 'taken', 'given', 'forgotten', 'spoken', 'broken', 'frozen', 'held', 'ridden', 'flown', 'built', 'referred', 'brought', 'bought', 'caught', 'fought', 'heard', 'left', 'lost', 'made', 'met', 'paid', 'read', 'sold', 'sent', 'stood', 'taught', 'told', 'won', 'worn'];
+
+            // Combine regular and irregular forms in a single regular expression
+            const passiveRegex = new RegExp(`\\b(is|are|was|were|be|been|being)\\b\\s+(\\w+ed|${irregularVerbs.join('|')})\\b`, 'i');
+
+            // Keyword Density Calculation
+            if (keywords.length > 0) {
+                results += `<h3>Keyword Density:</h3><ul>`;
+                keywords.forEach(keyword => {
+                    const keywordCount = (text.match(new RegExp(keyword, 'gi')) || []).length;
+                    const density = totalWords > 0 ? ((keywordCount / totalWords) * 100).toFixed(2) : 0;
+                    results += `<li>"${keyword}": ${keywordCount} occurrences, Density: ${density}%</li>`;
+                });
+                results += `</ul>`;
+            } else {
+                results += `<p>No keywords entered.</p>`;
+            }
+
+            // Check Passive Voice (Enhanced for irregular verbs)
+            const passiveSentences = sentences.filter(sentence => passiveRegex.test(sentence));
+            const passivePercentage = (passiveSentences.length / sentences.length) * 100;
+            results += `<h3>Passive Voice Sentences: ${passiveSentences.length} (${passivePercentage.toFixed(2)}%)</h3>`;
+            passiveSentences.forEach(sentence => {
+                results += `<p class="highlight">Passive: "${sentence.trim()}"</p>`;
+            });
+
+            // Check Long Sentences (>23 words)
+            const longSentences = sentences.filter(sentence => sentence.split(/\s+/).length > 22);
+            const longSentencePercentage = (longSentences.length / sentences.length) * 100;
+            results += `<h3>Sentences with more than 23 words: ${longSentences.length} (${longSentencePercentage.toFixed(2)}%)</h3>`;
+            longSentences.forEach(sentence => {
+                results += `<p class="highlight">Long: "${sentence.trim()}"</p>`;
+            });
+
+            // Check Long Paragraphs (>100 words)
+            results += `<h3>Paragraphs:</h3>`;
+            paragraphs.forEach(paragraph => {
+                const paragraphWordCount = paragraph.split(/\s+/).filter(word => word).length;
+                if (paragraphWordCount > 100) {
+                    results += `<p class="highlight">Long Paragraph (${paragraphWordCount} words): ${paragraph.trim()}</p>`;
+                } else {
+                    results += `<p>${paragraph.trim()} (${paragraphWordCount} words)</p>`;
+                }
+            });
+
+            const longParagraphs = paragraphs.filter(paragraph => paragraph.split(/\s+/).length > 100);
+            const hasLongParagraph = longParagraphs.length > 0;
+
+            // New Feature: Highlight 3 Consecutive Sentences Starting with the Same Word
+            results += `<h3>Consecutive Sentences Starting with the Same Word:</h3>`;
+            for (let i = 0; i < sentences.length - 2; i++) {
+                const firstWord1 = sentences[i].trim().split(/\s+/)[0].toLowerCase();
+                const firstWord2 = sentences[i + 1].trim().split(/\s+/)[0].toLowerCase();
+                const firstWord3 = sentences[i + 2].trim().split(/\s+/)[0].toLowerCase();
+
+                if ((firstWord1 === firstWord2) && (firstWord2 === firstWord3)) {
+                    results += `<p class="highlight-consecutive">"${sentences[i].trim()}"</p>`;
+                    results += `<p class="highlight-consecutive">"${sentences[i + 1].trim()}"</p>`;
+                    results += `<p class="highlight-consecutive">"${sentences[i + 2].trim()}"</p>`;
+                    i += 2; // Skip the next two sentences since they are part of the consecutive group
+                    consecutiveFlag = true; // Set flag if found
+                }
+            }
+
+            document.getElementById('result').innerHTML = results;
+
+            // Generate Status Buttons
+            const statusButtons = document.getElementById('statusButtons');
+            statusButtons.innerHTML = ''; // Reset
+
+            // Passive Voice Button
+            let passiveButtonClass = '';
+            if (passivePercentage < 10) {
+                passiveButtonClass = 'green';
+            } else if (passivePercentage >= 10 && passivePercentage < 20) {
+                passiveButtonClass = 'orange';
+            } else {
+                passiveButtonClass = 'red';
+            }
+            statusButtons.innerHTML += `<div class="status-button ${passiveButtonClass}">Passive Voice: ${passivePercentage.toFixed(2)}%</div>`;
+
+            // Long Sentences Button
+            let longSentenceButtonClass = '';
+            if (longSentencePercentage < 10) {
+                longSentenceButtonClass = 'green';
+            } else if (longSentencePercentage >= 10 && longSentencePercentage < 20) {
+                longSentenceButtonClass = 'orange';
+            } else {
+                longSentenceButtonClass = 'red';
+            }
+            statusButtons.innerHTML += `<div class="status-button ${longSentenceButtonClass}">Long Sentences: ${longSentencePercentage.toFixed(2)}%</div>`;
+
+            // Long Paragraphs Button
+            const longParagraphButtonClass = hasLongParagraph ? 'red' : 'green';
+            const longParagraphButtonText = hasLongParagraph ? 'Long Paragraph Found' : 'No Long Paragraph Found';
+            statusButtons.innerHTML += `<div class="status-button ${longParagraphButtonClass}">${longParagraphButtonText}</div>`;
+
+            // Consecutive Sentences Button
+            const consecutiveButtonClass = consecutiveFlag ? 'red' : 'green';
+            const consecutiveButtonText = consecutiveFlag ? 'Consecutive Sentences Found' : 'No Consecutive Sentences Found';
+            statusButtons.innerHTML += `<div class="status-button ${consecutiveButtonClass}">${consecutiveButtonText}</div>`;
+        }
+    </script>
+</body>
+
+</html>

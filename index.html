@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Tool Suite</title>
+    <link rel="stylesheet" href="style.css">  
+    
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <a href="Project.html">Home</a>
+        <a href="ContentAnalyzer.html">Content Analyzer</a>
+        <a href="GPTCommand Generator.html">GPT Command Generating Article</a>
+        <a href="StrongPassword Generator.html">Strong Password Generator</a>
+    </div>
+
+    <div class="container">
+        <h2>URL Tool Suite</h2>
+        <select id="toolSelector">
+            <option value="extractDomains">Extract Domains</option>
+            <option value="uniqueUrls">Unique URLs</option>
+            <option value="wpAdminUrls">WP-Admin URL Generator</option>
+            <option value="googleSiteSearch">Google Site Search Query Generator</option>
+            <option value="ahrefsChecker">Ahrefs Domain Rating Checker</option>
+            <option value="ahrefsTrafficChecker">Ahrefs Traffic Checker</option>
+        </select>
+
+        <textarea id="urlInput" placeholder="Enter URLs "></textarea>
+        <button onclick="executeTool()">Run Tool</button>
+        <button id="openAllBtn" style="display: none;" onclick="openAllURLs()">Open All URLs</button>
+        <button id="copyAllBtn" style="display: none;" onclick="copyAllURLs()">Copy All URLs</button>
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        // Store results globally for copy and open functions
+        let generatedUrls = [];
+
+        // Function to handle tool execution based on dropdown selection
+        function executeTool() {
+            const selectedTool = document.getElementById('toolSelector').value;
+
+            // Hide open/copy buttons initially
+            document.getElementById('openAllBtn').style.display = 'none';
+            document.getElementById('copyAllBtn').style.display = 'none';
+
+            if (selectedTool === 'extractDomains') {
+                extractDomains();
+            } else if (selectedTool === 'uniqueUrls') {
+                getUniqueUrls();
+            } else if (selectedTool === 'wpAdminUrls') {
+                generateWpAdminUrls();
+            } else if (selectedTool === 'googleSiteSearch') {
+                generateGoogleSiteSearchQueries();
+            } else if (selectedTool === 'ahrefsChecker') {
+                generateAhrefsURLs();
+            } else if (selectedTool === 'ahrefsTrafficChecker') {
+                generateAhrefsTrafficURLs();
+            }
+        }
+
+        // Extract Domains
+        function extractDomains() {
+            const urls = document.getElementById('urlInput').value.trim().split('\n');
+            
+            function getDomain(url) {
+                let domain;
+                if (url.indexOf("//") > -1) {
+                    domain = url.split('/')[2];
+                } else {
+                    domain = url.split('/')[0];
+                }
+                domain = domain.split(':')[0].split('?')[0];
+                return domain;
+            }
+
+            generatedUrls = urls.map(url => getDomain(url.trim()));
+            displayResult(generatedUrls);
+        }
+
+        // Unique URLs
+        function getUniqueUrls() {
+            const input = document.getElementById('urlInput').value.trim();
+            if (!input) {
+                document.getElementById('result').textContent = 'Please enter some URLs.';
+                return;
+            }
+
+            const urls = input.split('\n').map(url => url.trim()).filter(Boolean);
+            const uniqueDomains = new Set();
+            const uniqueUrls = [];
+
+            function ensureProtocol(url) {
+                if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                    return 'https://' + url;
+                }
+                return url;
+            }
+
+            urls.forEach(url => {
+                try {
+                    const fullUrl = ensureProtocol(url);
+                    const domain = (new URL(fullUrl)).hostname;
+                    if (!uniqueDomains.has(domain)) {
+                        uniqueDomains.add(domain);
+                        uniqueUrls.push(url);
+                    }
+                } catch (error) {
+                    console.error(`Invalid URL skipped: ${url}`);
+                }
+            });
+
+            generatedUrls = uniqueUrls;
+            displayResult(generatedUrls);
+        }
+
+        // WP-Admin URL Generator
+        function generateWpAdminUrls() {
+            const input = document.getElementById('urlInput').value.trim();
+            if (!input) {
+                document.getElementById('result').textContent = 'Please enter some URLs.';
+                return;
+            }
+
+            const urls = input.split('\n').map(url => url.trim()).filter(Boolean);
+            const wpAdminUrls = [];
+
+            function ensureProtocol(url) {
+                if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                    return 'https://' + url;
+                }
+                return url;
+            }
+
+            urls.forEach(url => {
+                try {
+                    const fullUrl = ensureProtocol(url);
+                    const domain = (new URL(fullUrl)).origin;
+                    wpAdminUrls.push(`${domain}/wp-admin`);
+                } catch (error) {
+                    console.error(`Invalid URL skipped: ${url}`);
+                }
+            });
+
+            generatedUrls = wpAdminUrls;
+            displayResult(generatedUrls);
+        }
+
+        // Google Site Search Query Generator
+        function generateGoogleSiteSearchQueries() {
+            const input = document.getElementById('urlInput').value.trim();
+            if (!input) {
+                document.getElementById('result').textContent = 'Please enter some URLs.';
+                return;
+            }
+
+            const urls = input.split('\n').map(url => url.trim()).filter(Boolean);
+            const googleSearchUrls = [];
+
+            urls.forEach(url => {
+                try {
+                    const cleanUrl = url.replace(/(^\w+:|^)\/\//, ''); // Remove http:// or https:// if present
+                    const googleQueryUrl = `https://www.google.com/search?q=site%3A${encodeURIComponent(cleanUrl)}`;
+                    googleSearchUrls.push(googleQueryUrl);
+                } catch (error) {
+                    console.error(`Invalid URL skipped: ${url}`);
+                }
+            });
+
+            generatedUrls = googleSearchUrls;
+            displayResult(generatedUrls);
+        }
+
+        // Ahrefs Domain Rating Checker URL Generator
+        function generateAhrefsURLs() {
+            const input = document.getElementById('urlInput').value.trim();
+            if (!input) {
+                document.getElementById('result').textContent = 'Please enter some URLs.';
+                return;
+            }
+
+            const urls = input.split('\n').map(url => url.trim()).filter(Boolean);
+            const ahrefsUrls = [];
+
+            urls.forEach(url => {
+                try {
+                    const cleanUrl = url.replace(/(^\w+:|^)\/\//, ''); // Remove http:// or https:// if present
+                    const ahrefsQueryUrl = `https://ahrefs.com/website-authority-checker/?input=${encodeURIComponent(cleanUrl)}`;
+                    ahrefsUrls.push(ahrefsQueryUrl);
+                } catch (error) {
+                    console.error(`Invalid URL skipped: ${url}`);
+                }
+            });
+
+            generatedUrls = ahrefsUrls;
+            displayResult(generatedUrls);
+        }
+
+        // Ahrefs Traffic Checker URL Generator
+        function generateAhrefsTrafficURLs() {
+            const input = document.getElementById('urlInput').value.trim();
+            if (!input) {
+                document.getElementById('result').textContent = 'Please enter some URLs.';
+                return;
+            }
+
+            const urls = input.split('\n').map(url => url.trim()).filter(Boolean);
+            const ahrefsUrls = [];
+
+            urls.forEach(url => {
+                try {
+                    const cleanUrl = url.replace(/(^\w+:|^)\/\//, ''); // Remove http:// or https:// if present
+                    const ahrefsQueryUrl = `https://ahrefs.com/traffic-checker/?input=${encodeURIComponent(cleanUrl)}`;
+                    ahrefsUrls.push(ahrefsQueryUrl);
+                } catch (error) {
+                    console.error(`Invalid URL skipped: ${url}`);
+                }
+            });
+
+            generatedUrls = ahrefsUrls;
+            displayResult(generatedUrls);
+        }
+
+        // Display Result
+        function displayResult(urls) {
+            const output = document.getElementById('result');
+            output.innerHTML = '';
+
+            if (urls.length) {
+                urls.forEach(queryUrl => {
+                    const link = document.createElement('a');
+                    link.href = queryUrl;
+                    link.target = '_blank'; // Open in new tab
+                    link.textContent = queryUrl;
+                    output.appendChild(link);
+                });
+                document.getElementById('openAllBtn').style.display = 'block';
+                document.getElementById('copyAllBtn').style.display = 'block';
+            } else {
+                output.textContent = 'No valid URLs found.';
+            }
+        }
+
+        // Open all generated URLs in new tabs
+        function openAllURLs() {
+            generatedUrls.forEach(url => {
+                window.open(url, '_blank');
+            });
+        }
+
+        // Copy all generated URLs to clipboard
+        function copyAllURLs() {
+            const urlsToCopy = generatedUrls.join('\n'); // Join URLs with new lines
+
+            navigator.clipboard.writeText(urlsToCopy).then(() => {
+                alert('All URLs copied to clipboard!');
+            }).catch(err => {
+                console.error('Could not copy text: ', err);
+            });
+        }
+    </script>
+</body>
+</html>
